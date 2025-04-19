@@ -281,7 +281,18 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ conversation })
         });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || `API Error (Status ${res.status})`);
+        }
+
         const data = await res.json();
+        
+        if (!data?.message) {
+          throw new Error("Empty response from server");
+        }
+
         let reply = data.message;
         reply = reply.replace(/Do you understand\?.*?/gi, 'Do you understand?');
         conversation.push({ role: 'assistant', content: reply });
@@ -289,8 +300,14 @@
         if (thinkingRow) thinkingRow.remove();
         handleAssistantReply(reply);
       } catch (err) {
+        console.error("Chat Error:", err);
         if (thinkingRow) thinkingRow.remove();
-        addMessage("⚠️ Something went wrong. Please try again later.", 'assistant');
+        
+        const friendlyError = err.message.includes('API Error') 
+          ? "Network issue - please check connection"
+          : "Temporary issue - please try again";
+        
+        addMessage(`⚠️ ${friendlyError}`, 'assistant');
       }
     }
 
