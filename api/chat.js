@@ -134,9 +134,10 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+    console.log("🧠 DeepSeek response:", data);
 
     if (!response.ok) {
-      console.error("DeepSeek API Error:", await response.text());
+      console.error("DeepSeek API Error:", data);
       return res.status(500).json({ message: "DeepSeek response failed." });
     }
 
