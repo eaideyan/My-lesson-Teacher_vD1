@@ -129,7 +129,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: history,
-        temperature: 0.5,
+        temperature: 1.0,
       }),
     });
 
