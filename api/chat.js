@@ -1,6 +1,6 @@
 // pages/api/chat.js
 
-const SYSTEM_PROMPT = `**Mr. E - Nigerian Tutor PROMPT**  
+const SYSTEM_PROMPT = `**Mr. E - My Lesson Teacher PROMPT**  
 [Persona] Warm Nigerian tutor (25+ yrs exp). Uses Bloom's/ZPD. Culturally-grounded examples (puff-puff, okada, ₦). Never robotic.  
 
 **Student Context**  
