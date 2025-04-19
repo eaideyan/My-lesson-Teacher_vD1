@@ -194,27 +194,21 @@
   </div>
 
   <main id="wrapper">
-<aside id="leftSidebar">
-  <h3 id="knowledgeHeader" style="display: none;">📘 Knowledge Tree</h3>
-
-  <div id="knowledgeContent">
-    <!-- Default welcome message -->
-    <div id="aboutMrE">
-      <p><strong>I am Mr. E</strong></p>
-      <p>Your friendly AI tutor! 🌟<br/>
-        I’ll help you learn one step at a time. Feel free to interrupt, ask questions and clarification.<br/>
-        Remember this space belongs to me and you and we can learn together, no stress — so relax, let’s start!
-      </p>
-    </div>
-
-    <!-- Dynamic knowledge tree will be injected here -->
-    <div id="treeContents" style="margin-top: 0.8rem;"></div>
-
-    <!-- Progress bar + feedback -->
-    <div id="progressVisual" style="margin-top: 1rem; font-weight: bold;"></div>
-    <div id="progressFeedback" style="font-size: 0.85rem; color: #4b5563; margin-top: 0.3rem;"></div>
-  </div>
-</aside>
+    <aside id="leftSidebar">
+      <h3 id="knowledgeHeader" style="display: none;">📘 Knowledge Tree</h3>
+      <div id="knowledgeContent">
+        <div id="aboutMrE">
+          <p><strong>I am Mr. E</strong></p>
+          <p>Your friendly AI tutor! 🌟<br/>
+            I’ll help you learn one step at a time. Feel free to interrupt, ask questions and clarification.<br/>
+            Remember this space belongs to me and you and we can learn together, no stress — so relax, let’s start!
+          </p>
+        </div>
+        <div id="treeContents" style="margin-top: 0.8rem;"></div>
+        <div id="progressVisual" style="margin-top: 1rem; font-weight: bold;"></div>
+        <div id="progressFeedback" style="font-size: 0.85rem; color: #4b5563; margin-top: 0.3rem;"></div>
+      </div>
+    </aside>
 
     <div id="chatBoxWrapper">
       <div id="chat"></div>
@@ -300,73 +294,66 @@
       }
     }
 
-    // ----- UI Sync Functions -----
-function handleAssistantReply(reply) {
-  addMessage(reply, 'assistant');
-  speak(reply);
+    function handleAssistantReply(reply) {
+      addMessage(reply, 'assistant');
+      speak(reply);
 
-  const treeStart = reply.indexOf('Knowledge Tree:');
-  if (treeStart !== -1) {
-    const subTree = reply.slice(treeStart).split('\n').slice(1, 6).join('\n');
-    updateKnowledgeTreeInSidebar(subTree);
-    updateProgressBar(); // reset to 0
-  }
+      const treeStart = reply.indexOf('Knowledge Tree:');
+      if (treeStart !== -1) {
+        const subTree = reply.slice(treeStart).split('\n').slice(1, 6).join('\n');
+        updateKnowledgeTreeInSidebar(subTree);
+        updateProgressBar();
+      }
 
-  updateProgressBarFromMessage(reply); // update dynamically later
-}
+      updateProgressBarFromMessage(reply);
+    }
 
-function updateKnowledgeTreeInSidebar(treeText) {
-  const header = document.getElementById('knowledgeHeader');
-  const about = document.getElementById('aboutMrE');
-  const treeContainer = document.getElementById('treeContents');
+    function updateKnowledgeTreeInSidebar(treeText) {
+      const header = document.getElementById('knowledgeHeader');
+      const about = document.getElementById('aboutMrE');
+      const treeContainer = document.getElementById('treeContents');
 
-  if (!header || !about || !treeContainer) return;
+      if (!header || !about || !treeContainer) return;
 
-  const lines = treeText
-    .split('\n')
-    .filter(line => /^\d\./.test(line.trim()))
-    .map(line => `<li>${line.trim()}</li>`)
-    .join('');
+      const lines = treeText
+        .split('\n')
+        .filter(line => /^\d\./.test(line.trim()))
+        .map(line => `<li>${line.trim()}</li>`)
+        .join('');
 
-  if (lines) {
-    // Show the tree title and hide the intro
-    header.style.display = 'block';
-    about.style.display = 'none';
+      if (lines) {
+        header.style.display = 'block';
+        about.style.display = 'none';
+        treeContainer.innerHTML = `<ol style="padding-left: 1rem;">${lines}</ol>`;
+        updateProgressBar(); 
+      }
+    }
 
-    // Add the ordered list to the tree container
-    treeContainer.innerHTML = `<ol style="padding-left: 1rem;">${lines}</ol>`;
+    function updateProgressBar(state = '⬜⬜⬜⬜⬜', count = 0) {
+      const progressEl = document.getElementById('progressVisual');
+      const feedbackEl = document.getElementById('progressFeedback');
 
-    // Reset progress bar to empty
-    updateProgressBar(); 
-  }
-}
+      if (progressEl) {
+        progressEl.textContent = `🧠 Progress: ${state} (${count}/5 mastered!)`;
+      }
 
-function updateProgressBar(state = '⬜⬜⬜⬜⬜', count = 0) {
-  const progressEl = document.getElementById('progressVisual');
-  const feedbackEl = document.getElementById('progressFeedback');
+      if (feedbackEl) {
+        feedbackEl.textContent =
+          count === 0
+            ? "Let's begin your learning journey! 🚀"
+            : count === 5
+            ? "Woohoo! 🎉 You've completed the topic!"
+            : "Great job! Keep going, you're doing well! 🌟";
+      }
+    }
 
-  if (progressEl) {
-    progressEl.textContent = `🧠 Progress: ${state} (${count}/5 mastered!)`;
-  }
+    function updateProgressBarFromMessage(message) {
+      const match = message.match(/🧠 Progress: (.*?) \((\d+)\/5 mastered!\)/);
+      if (!match) return;
+      const [_, state, count] = match;
+      updateProgressBar(state, parseInt(count));
+    }
 
-  if (feedbackEl) {
-    feedbackEl.textContent =
-      count === 0
-        ? "Let's begin your learning journey! 🚀"
-        : count === 5
-        ? "Woohoo! 🎉 You've completed the topic!"
-        : "Great job! Keep going, you're doing well! 🌟";
-  }
-}
-
-function updateProgressBarFromMessage(message) {
-  const match = message.match(/🧠 Progress: (.*?) \((\d+)\/5 mastered!\)/);
-  if (!match) return;
-  const [_, state, count] = match;
-  updateProgressBar(state, parseInt(count));
-}
-
-    // ----- Load Initial Prompt -----
     window.onload = () => {
       const intro = "Welcome to Your AI Tutor! 🌟 I’m Mr. E, your lesson teacher!\nWhat’s your name, grade, and what topic would you like to learn today?";
       conversation.push({ role: 'assistant', content: intro });
@@ -395,7 +382,6 @@ function updateProgressBarFromMessage(message) {
       window.onload();
     });
 
-    // Voice Input (optional)
     const recognition = ('webkitSpeechRecognition' in window) ? new webkitSpeechRecognition() : null;
     if (recognition) {
       recognition.lang = 'en-NG';
